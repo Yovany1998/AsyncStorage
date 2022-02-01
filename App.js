@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useState, useEffect} from 'react';
 import {
   Button,
   SafeAreaView,
@@ -11,22 +11,70 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage'
+
 
 
 
 const App = () => {
+
+  const [inputTexto,guardarInputTexto]= useState('');
+  const [nombreStorage,guardarNombreStorage]= useState('');
+
+  useEffect(() => {
+    obtenerDatosStorage();
+  }, [])
+
+  const guardarDatos = async () =>{
+    try{
+      await AsyncStorage.setItem('nombre', inputTexto)
+      guardarNombreStorage(inputTexto)
+    }catch(erro){
+
+    }
+  }
+
+  const obtenerDatosStorage =async () =>{
+    try {
+      const nombre = await AsyncStorage.getItem('nombre');
+      guardarNombreStorage(nombre)
+    } catch (error) {
+      
+    }
+  }
+  const eliminarDatos = async () =>{
+    try {
+      await AsyncStorage.removeItem('nombre');
+      guardarNombreStorage('')
+    } catch (error) {
+      
+    }
+  }
+
   return (
     <>
       <View style={styles.contenedor}>
-          <TextInput style={styles.input}/>
+        {nombreStorage ? <Text style={styles.texto}>Hola {nombreStorage}</Text> : null }
+        
+          <TextInput 
+          style={styles.input}
+          placeholder='Escribe tu nombre'
+          placeholderTextColor={'#000'}
+          onChangeText={texto => guardarInputTexto(texto)}
+
+          />
           <Button
           title="Guardar"
           color= '#333'
+          onPress={ () => guardarDatos() }
           />
-
-          <TouchableHighlight style={styles.btnEliminar}>
+            {nombreStorage ?
+          <TouchableHighlight 
+          onPress={() => eliminarDatos()}
+          style={styles.btnEliminar}>
               <Text style={styles.textoEliminar}>Eliminar Nombre</Text>
           </TouchableHighlight>
+          : null}
       </View>
     </>
   );
@@ -57,6 +105,9 @@ const styles = StyleSheet.create({
   textAlign: 'center',
   textTransform: 'uppercase',
   width: 300
+ },
+ texto:{
+   color: '#000'
  }
 });
 
